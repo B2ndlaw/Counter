@@ -3,6 +3,7 @@ import { Counter } from "./components/pages/counter/Counter";
 import { Controller } from "./components/pages/controller/Controller";
 import styled from "styled-components";
 import { useState } from "react";
+import { log } from "console";
 
 export function App() {
   //Counter data
@@ -13,7 +14,10 @@ export function App() {
   //Controller data
   let [startValue, setStartValue] = useState("0");
   let [maxValue, setMaxValue] = useState("5");
-  let [buttonSet, setButtonSet] = useState(true);
+  let [buttonDisabled, setButtonDisabled] = useState(true);
+
+  //Error
+  let [error, setError] = useState<string | null>(null);
 
   //Counter functions
   const increment = () => {
@@ -34,32 +38,62 @@ export function App() {
     setButtonReset(true);
   };
 
+  //Error
+
+  const checkError = (value: string) => {
+    if (
+      +value < 0 ||
+      +startValue < 0 ||
+      +maxValue < 0 ||
+      +startValue >= +maxValue
+    ) {
+      setError("Incorrect value!");
+    } else {
+      setError("Enter values and press 'Set'");
+    }
+    console.log(error, value, startValue, maxValue);
+  };
+
   //Controller functions
-  const startValueCounter = (value: string) => {
-    setStartValue(value);
-    setButtonSet(false);
-  
+  const changeStartValue = (value: string) => {
+    checkError(value);
+
+    if (error === "Incorrect value!") {
+      setStartValue(value);
+      setButtonDisabled(true);
+    } else {
+      setStartValue(value);
+      setButtonDisabled(false);
+    }
   };
 
-  const maxValueCounter = (value: string) => {
-    setMaxValue(value);
-    setButtonSet(false);
+  const changeMaxValue = (value: string) => {
+    checkError(value);
+
+    if (error === "Incorrect value!") {
+      setMaxValue(value);
+      setButtonDisabled(true);
+    } else {
+      setMaxValue(value);
+      setButtonDisabled(false);
+    }
   };
 
-  const counterValue = () => {
+  const changeCounterValue = () => {
     setCounter(+startValue);
-    
-  }
+    setError(null);
+  };
 
   return (
     <FlexWrapper>
       <Controller
-        maxValueCounter={maxValueCounter}
+        changeMaxValue={changeMaxValue}
         maxValue={maxValue}
-        startValueCounter={startValueCounter}
+        changeStartValue={changeStartValue}
         startValue={startValue}
-        buttonSet={buttonSet}
-        counterValue={counterValue}
+        buttonDisabled={buttonDisabled}
+        changeCounterValue={changeCounterValue}
+        error={error}
       />
       <Counter
         counter={counter}
@@ -68,6 +102,7 @@ export function App() {
         reset={reset}
         buttonReset={buttonReset}
         maxValue={maxValue}
+        error={error}
       />
     </FlexWrapper>
   );
