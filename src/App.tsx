@@ -2,8 +2,7 @@ import "./App.css";
 import { Counter } from "./components/pages/counter/Counter";
 import { Controller } from "./components/pages/controller/Controller";
 import styled from "styled-components";
-import { useState } from "react";
-import { log } from "console";
+import { useEffect, useState } from "react";
 
 export function App() {
   //Counter data
@@ -14,7 +13,46 @@ export function App() {
   //Controller data
   let [startValue, setStartValue] = useState("0");
   let [maxValue, setMaxValue] = useState("5");
-  let [buttonDisabled, setButtonDisabled] = useState(true);
+
+  //useEffect counter
+  useEffect(() => {
+    let valueAsString = localStorage.getItem("counterValue");
+    if (valueAsString) {
+      let newValue = JSON.parse(valueAsString);
+      setCounter(newValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("counterValue", JSON.stringify(counter));
+  }, [counter]);
+
+  //useEffect startValue
+
+  useEffect(() => {
+    let startValueAsString = localStorage.getItem("startValue");
+    if (startValueAsString) {
+      let newStartValue = JSON.parse(startValueAsString);
+      setStartValue(newStartValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("startValue", JSON.stringify(startValue));
+  }, [startValue]);
+
+  //useEffect maxValue
+  useEffect(() => {
+    let maxValueAsString = localStorage.getItem("maxValue");
+    if (maxValueAsString) {
+      let newMaxValue = JSON.parse(maxValueAsString);
+      setMaxValue(newMaxValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("maxValue", JSON.stringify(maxValue));
+  }, [maxValue]);
 
   //Error
   let [error, setError] = useState<string | null>(null);
@@ -38,44 +76,25 @@ export function App() {
     setButtonReset(true);
   };
 
-  //Error
+  //Controller functions
+  const changeStartValue = (value: string) => {
+    setStartValue(value);
 
-  const checkError = (value: string) => {
-    if (
-      +value < 0 ||
-      +startValue < 0 ||
-      +maxValue < 0 ||
-      +startValue >= +maxValue
-    ) {
+    if (+value < 0 || +value >= +maxValue) {
       setError("Incorrect value!");
     } else {
       setError("Enter values and press 'Set'");
     }
-    console.log(error, value, startValue, maxValue);
-  };
-
-  //Controller functions
-  const changeStartValue = (value: string) => {
-    checkError(value);
-
-    if (error === "Incorrect value!") {
-      setStartValue(value);
-      setButtonDisabled(true);
-    } else {
-      setStartValue(value);
-      setButtonDisabled(false);
-    }
+    console.log(error);
   };
 
   const changeMaxValue = (value: string) => {
-    checkError(value);
+    setMaxValue(value);
 
-    if (error === "Incorrect value!") {
-      setMaxValue(value);
-      setButtonDisabled(true);
+    if (+startValue < 0 || +startValue >= +value) {
+      setError("Incorrect value!");
     } else {
-      setMaxValue(value);
-      setButtonDisabled(false);
+      setError("Enter values and press 'Set'");
     }
   };
 
@@ -83,6 +102,7 @@ export function App() {
     setCounter(+startValue);
     setError(null);
   };
+  const buttonDisabled = error === "Incorrect value!";
 
   return (
     <FlexWrapper>
